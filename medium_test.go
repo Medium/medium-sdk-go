@@ -5,6 +5,7 @@ package medium
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +17,7 @@ import (
 // fakeFS is a filesystem that works in memory.
 type fakeFS struct{}
 
-func (fakeFS) Open(name string) (file, error) {
+func (fakeFS) Open(name string) (io.ReadCloser, error) {
 	return ioutil.NopCloser(bytes.NewReader([]byte("contents"))), nil
 }
 
@@ -30,13 +31,13 @@ type apiTest struct {
 	bodyPattern string
 }
 
-var m = New("clientId", "clientSecret")
+var m = NewClient("clientId", "clientSecret")
 
 var apiTests = []apiTest{
 	{"token", m.GetUser, nil,
 		"GET", "/v1/me", "application/json",
 		"null"},
-	{"token", m.CreatePost, CreatePostOptions{UserId: "42", Title: "Title", Content: "Yo", ContentFormat: "html"},
+	{"token", m.CreatePost, CreatePostOptions{UserID: "42", Title: "Title", Content: "Yo", ContentFormat: "html"},
 		"POST", "/v1/users/42/posts", "application/json",
 		`{"title":"Title","content":"Yo","contentFormat":"html"}`},
 	{"token", m.UploadImage, UploadOptions{FilePath: "/fake/file.png", ContentType: "image/png"},
@@ -49,7 +50,7 @@ func TestApiMethods(t *testing.T) {
 	m.fs = fakeFS{}
 	var body []byte
 	var req *http.Request
-	var ts *httptest.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req = r
 		body, _ = ioutil.ReadAll(req.Body)
 	}))
@@ -60,7 +61,7 @@ func TestApiMethods(t *testing.T) {
 		m.AccessToken = tt.token
 
 		f := reflect.ValueOf(tt.fn)
-		pl := make([]reflect.Value, 0)
+		var pl []reflect.Value
 		if tt.payload != nil {
 			pl = append(pl, reflect.ValueOf(tt.payload))
 		}

@@ -5,48 +5,79 @@ This repository contains the open source SDK for integrating [Medium](https://me
 Install
 -------
 
-    go get https://github.com/majelbstoat/medium-sdk-go
+    go get https://github.com/Medium/medium-sdk-go
 
 Usage
 -----
 
 Create a client, then call commands on it.
 
-
 ```go
-  import (
-    medium "github.com/majelbstoat/medium-sdk-go"
-  )
-  
-  m := medium.New("YOUR_APPLICATION_ID", "YOUR_APPLICATION_SECRET")
-  url := m.GetAuthorizationUrl([]string{medium.BasicProfile, medium.PublishPost},
-      "https://yoursite.com/callback/medium")
-  
-  // (Send the user to the URL to acquire an authorization code.)
+package main
 
-  at, err := m.ExchangeAuthorizationCode("YOUR_AUTHORIZATION_CODE", "https://yoursite.com/callback/medium")
-  u, err := m.GetUser()
-  p, err := m.CreatePost(medium.CreatePostOptions{
-    UserId: u.Id,
-    Title: "Title",
-    Content: "<h2>Title</h2><p>Content</p>",
-    ContentFormat: medium.HTML,
-    PublishStatus: medium.Draft
-  })
-  
-  // (Assuming no errors, the created post now lives at p.url.)
+import (
+	medium "github.com/medium/medium-sdk-go"
+	"log"
+)
+
+func main() {
+	// Contact developers@medium.com to get your applicationId and applicationSecret.
+	m := medium.NewClient("YOUR_APPLICATION_ID", "YOUR_APPLICATION_SECRET")
+
+	// Build the URL where you can send the user to obtain an authorization code.
+	url := m.GetAuthorizationUrl("secretstate", "https://yoursite.com/callback/medium"
+        medium.BasicProfile, medium.PublishPost)
+
+	// (Send the user to the authorization URL to obtain an authorization code.)
+
+	// Exchange the authorization code for an access token.
+	at, err := m.ExchangeAuthorizationCode("YOUR_AUTHORIZATION_CODE", "https://yoursite.com/callback/medium")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// The access token is automatically set on the client for you after
+	// a successful exchange, but if you already have a token, you can set it
+	// directly.
+	m.AccessToken = at.AccessToken
+
+	// Get profile details of the user identified by the access token.
+	u, err := m.GetUser()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a draft post.
+	p, err := m.CreatePost(medium.CreatePostOptions{
+		UserID:        u.ID,
+		Title:         "Title",
+		Content:       "<h2>Title</h2><p>Content</p>",
+		ContentFormat: medium.ContentFormatHTML,
+		PublishStatus: medium.PublishStatusDraft,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// When your access token expires, use the refresh token to get a new one.
+	nt, err := m.ExchangeRefreshToken(at.RefreshToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Confirm everything went ok. p.URL has the location of the created post.
+	log.Println(url, at, u, p, nt)
+}
 ```
 
-Contributions
--------------
+Contributors
+------------
+
+[Jamie Talbot](https://github.com/majelbstoat)
+[Dan Pupius](https://github.com/dpup)
+[Andrew Bonventre](https://github.com/andybons)
 
 Questions, comments, bug reports and pull requests are all welcomed, especially those that make the code more idiomatic.
-
-Author
-------
-
-[Jamie Talbot](https://github.com/majelbstoat), supported by
-[Medium](https://medium.com).
 
 License
 -------
