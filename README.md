@@ -25,8 +25,8 @@ func main() {
 	m := medium.NewClient("YOUR_APPLICATION_ID", "YOUR_APPLICATION_SECRET")
 
 	// Build the URL where you can send the user to obtain an authorization code.
-	url := m.GetAuthorizationUrl("secretstate", "https://yoursite.com/callback/medium"
-        medium.BasicProfile, medium.PublishPost)
+	url := m.GetAuthorizationURL("secretstate", "https://yoursite.com/callback/medium",
+        medium.ScopeBasicProfile, medium.ScopePublishPost)
 
 	// (Send the user to the authorization URL to obtain an authorization code.)
 
@@ -86,4 +86,3 @@ Copyright 2015 [A Medium Corporation](https://medium.com)
 
 Licensed under Apache License Version 2.0.  Details in the attached LICENSE
 file.
-
