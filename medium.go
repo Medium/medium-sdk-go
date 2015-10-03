@@ -27,7 +27,8 @@ const (
 
 // Content formats that are available when creating a post on Medium.
 const (
-	ContentFormatHTML contentFormat = "html"
+	ContentFormatHTML     contentFormat = "html"
+	ContentFormatMarkdown               = "markdown"
 )
 
 // Publish statuses that are available when creating a post on Medium.
