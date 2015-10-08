@@ -156,6 +156,15 @@ func NewClient(id, secret string) *Medium {
 	}
 }
 
+// NewClientWithAccessToken returns a new Medium API client which can be used to make RPC requests.
+func NewClientWithAccessToken(accessToken string) *Medium {
+	return &Medium{
+		AccessToken: accessToken,
+		Host:        host,
+		fs:          osFS{},
+	}
+}
+
 // GetAuthorizationURL returns the URL to which an application may send
 // a user in order to acquire authorization.
 func (m *Medium) GetAuthorizationURL(state, redirectURL string, scopes ...scope) string {

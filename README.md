@@ -41,8 +41,12 @@ func main() {
 	// directly.
 	m.AccessToken = at.AccessToken
 
+	// If you have a self-issued access token, you can skip these steps and
+	// create a new client directly:
+	m2 := medium.NewClientWithAccessToken("SELF_ISSUED_ACCESS_TOKEN")
+
 	// Get profile details of the user identified by the access token.
-	u, err := m.GetUser()
+	u, err := m2.GetUser()
 	if err != nil {
 		log.Fatal(err)
 	}
