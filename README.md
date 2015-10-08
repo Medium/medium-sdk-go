@@ -79,7 +79,9 @@ Authors
 -------
 
 [Jamie Talbot](https://github.com/majelbstoat)
+
 [Dan Pupius](https://github.com/dpup)
+
 [Andrew Bonventre](https://github.com/andybons)
 
 License
