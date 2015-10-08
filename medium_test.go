@@ -11,7 +11,9 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
+	"time"
 )
 
 // fakeFS is a filesystem that works in memory.
@@ -42,11 +44,11 @@ var apiTests = []apiTest{
 		`{"title":"Title","content":"Yo","contentFormat":"html"}`},
 	{"token", m.UploadImage, UploadOptions{FilePath: "/fake/file.png", ContentType: "image/png"},
 		"POST", "/v1/images", "multipart/form-data.*",
-		`^--[a-z0-9]+\r\nContent-Disposition: form-data; name="image"; filename="file.png"\r\nContent-Type: image/png\r\n\r\ncontents\r\n--[a-z0-9]+--\r\n$`},
+		`^--[a-z0-9]+\r\n(Content-Disposition: form-data; name="image"; filename="file.png"|Content-Type: image/png)\r\n(Content-Disposition: form-data; name="image"; filename="file.png"|Content-Type: image/png)\r\n\r\ncontents\r\n--[a-z0-9]+--\r\n$`},
 }
 
-// TestApiMethods tests that http requests are constructed correctly.
-func TestApiMethods(t *testing.T) {
+// TestAPIMethods tests that http requests are constructed correctly.
+func TestAPIMethods(t *testing.T) {
 	m.fs = fakeFS{}
 	var body []byte
 	var req *http.Request
@@ -74,6 +76,28 @@ func TestApiMethods(t *testing.T) {
 		assertEqual(t, req.Method, tt.method)
 		assertEqual(t, req.URL.Path, tt.path)
 		assertMatch(t, string(body), tt.bodyPattern)
+	}
+}
+
+// TestAPITimeout verifies that HTTP timeouts work
+func TestAPITimeout(t *testing.T) {
+	m.AccessToken = "token"
+	m.Timeout = 1 * time.Millisecond
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(m.Timeout * 2) // sleep longer than timeout
+		fmt.Fprintln(w, "null")
+	}))
+	defer ts.Close()
+	m.Host = ts.URL
+
+	_, err := m.GetUser()
+	if err == nil {
+		t.Errorf("Expected HTTP timeout error, but call succeeded")
+	} else if !strings.Contains(err.Error(), "Client.Timeout exceeded") {
+		// go1.4 doesn't set the timeout error but closes the connection.
+		if !strings.Contains(err.Error(), "use of closed network connection") {
+			t.Errorf("Expected HTTP timeout error, got %s", err)
+		}
 	}
 }
 
