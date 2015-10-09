@@ -5,7 +5,7 @@ This repository contains the open source SDK for integrating [Medium](https://me
 Install
 -------
 
-    go get https://github.com/Medium/medium-sdk-go
+    go get github.com/Medium/medium-sdk-go
 
 Usage
 -----
