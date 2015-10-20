@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // Available scope options when requesting access to a user's Medium account.
@@ -54,6 +55,8 @@ const (
 const (
 	// host is the default host of Medium's API.
 	host = "https://api.medium.com"
+	// defaultTimeout is the default timeout duration used on HTTP requests.
+	defaultTimeout = 5 * time.Second
 	// defaultCode is the default error code for failures.
 	defaultCode = -1
 )
@@ -143,6 +146,7 @@ type Medium struct {
 	ApplicationSecret string
 	AccessToken       string
 	Host              string
+	Timeout           time.Duration
 	fs                fileOpener
 }
 
@@ -152,6 +156,7 @@ func NewClient(id, secret string) *Medium {
 		ApplicationID:     id,
 		ApplicationSecret: secret,
 		Host:              host,
+		Timeout:           defaultTimeout,
 		fs:                osFS{},
 	}
 }
@@ -335,8 +340,14 @@ func (m *Medium) request(cr clientRequest, result interface{}) error {
 	req.Header.Add("Accept-Charset", "utf-8")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", m.AccessToken))
 
+	// Create the HTTP client
+	client := &http.Client{
+		Transport: http.DefaultTransport,
+		Timeout:   m.Timeout,
+	}
+
 	// Make the request
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return Error{fmt.Sprintf("Failed to make request: %s", err), defaultCode}
 	}
