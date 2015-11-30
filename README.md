@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	// Contact developers@medium.com to get your applicationId and applicationSecret.
+	// Go to https://medium.com/me/applications to get your applicationId and applicationSecret.
 	m := medium.NewClient("YOUR_APPLICATION_ID", "YOUR_APPLICATION_SECRET")
 
 	// Build the URL where you can send the user to obtain an authorization code.
