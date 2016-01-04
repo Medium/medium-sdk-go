@@ -147,6 +147,7 @@ type Medium struct {
 	AccessToken       string
 	Host              string
 	Timeout           time.Duration
+	Transport         http.RoundTripper
 	fs                fileOpener
 }
 
@@ -157,6 +158,7 @@ func NewClient(id, secret string) *Medium {
 		ApplicationSecret: secret,
 		Host:              host,
 		Timeout:           defaultTimeout,
+		Transport:         http.DefaultTransport,
 		fs:                osFS{},
 	}
 }
@@ -342,7 +344,7 @@ func (m *Medium) request(cr clientRequest, result interface{}) error {
 
 	// Create the HTTP client
 	client := &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: m.Transport,
 		Timeout:   m.Timeout,
 	}
 
@@ -386,7 +388,7 @@ func (m *Medium) acquireAccessToken(v url.Values) (AccessToken, error) {
 	err := m.request(cr, &at)
 
 	// Set the access token on the service.
-	if err != nil {
+	if err == nil {
 		m.AccessToken = at.AccessToken
 	}
 	return at, err
