@@ -110,6 +110,32 @@ type User struct {
 	ImageURL string `json:"imageUrl"`
 }
 
+// Publications inherit all Medium user publications
+type Publications struct {
+	Data []Publication `json:"data"`
+}
+
+// Publication defines a Medium user publication
+type Publication struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	ImageURL    string `json:"imageUrl"`
+}
+
+// Contributors inherit all Medium publication contributors
+type Contributors struct {
+	Data []Contributor `json:"data"`
+}
+
+// Contributor defines a Medium publication contributor
+type Contributor struct {
+	PublicationID string `json:"publicationID"`
+	UserID        string `json:"userID"`
+	Role          string `json:"role"`
+}
+
 // Post defines a Medium post
 type Post struct {
 	ID           string        `json:"id"`
@@ -213,15 +239,49 @@ func (m *Medium) ExchangeRefreshToken(rt string) (AccessToken, error) {
 }
 
 // GetUser gets the profile identified by the current AccessToken.
+// It will get the specified user or the current user if userID is empty.
 // This requires m.AccessToken to have the BasicProfile scope.
-func (m *Medium) GetUser() (*User, error) {
-	r := clientRequest{
-		method: "GET",
-		path:   "/v1/me",
+func (m *Medium) GetUser(userID string) (*User, error) {
+	var r clientRequest
+	if userID == "" {
+		r = clientRequest{
+			method: "GET",
+			path:   "/v1/me",
+		}
+	} else {
+		r = clientRequest{
+			method: "GET",
+			path:   fmt.Sprintf("/v1/%s", userID),
+		}
 	}
 	u := &User{}
 	err := m.request(r, u)
 	return u, err
+}
+
+// GetUserPublications gets user publications by the current AccessToken.
+// This requires m.AccessToken to have the BasicPublications scope.
+func (m *Medium) GetUserPublications(userID string) (*Publications, error) {
+	r := clientRequest{
+		method: "GET",
+		path:   fmt.Sprintf("/v1/users/%s/publications", userID),
+	}
+	p := &Publications{}
+	err := m.request(r, p)
+	return p, err
+}
+
+// GetPublicationContributors gets contributors for givaen a publication
+// by the current AccessToken.
+// This requires m.AccessToken to have the BasicPublications scope.
+func (m *Medium) GetPublicationContributors(publicationID string) (*Contributors, error) {
+	r := clientRequest{
+		method: "GET",
+		path:   fmt.Sprintf("/v1/publications/%s/contributors", publicationID),
+	}
+	p := &Contributors{}
+	err := m.request(r, p)
+	return p, err
 }
 
 // CreatePost creates a post on the profile identified by the current AccessToken.

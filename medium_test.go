@@ -36,8 +36,17 @@ type apiTest struct {
 var m = NewClient("clientId", "clientSecret")
 
 var apiTests = []apiTest{
-	{"token", m.GetUser, nil,
+	{"token", m.GetUser, "",
 		"GET", "/v1/me", "application/json",
+		"null"},
+	{"token", m.GetUser, "@dummyUser",
+		"GET", "/v1/@dummyUser", "application/json",
+		"null"},
+	{"token", m.GetUserPublications, "@dummyUser",
+		"GET", "/v1/users/@dummyUser/publications", "application/json",
+		"null"},
+	{"token", m.GetPublicationContributors, "b45573563f5a",
+		"GET", "/v1/publications/b45573563f5a/contributors", "application/json",
 		"null"},
 	{"token", m.CreatePost, CreatePostOptions{UserID: "42", Title: "Title", Content: "Yo", ContentFormat: "html"},
 		"POST", "/v1/users/42/posts", "application/json",
@@ -90,7 +99,7 @@ func TestAPITimeout(t *testing.T) {
 	defer ts.Close()
 	m.Host = ts.URL
 
-	_, err := m.GetUser()
+	_, err := m.GetUser("")
 	if err == nil {
 		t.Errorf("Expected HTTP timeout error, but call succeeded")
 	} else if !strings.Contains(err.Error(), "Client.Timeout exceeded") {
