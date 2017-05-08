@@ -21,27 +21,27 @@ import (
 
 // Available scope options when requesting access to a user's Medium account.
 const (
-	ScopeBasicProfile scope = "basicProfile"
+	ScopeBasicProfile Scope = "basicProfile"
 	ScopePublishPost        = "publishPost"
 	ScopeUploadImage        = "uploadImage"
 )
 
 // Content formats that are available when creating a post on Medium.
 const (
-	ContentFormatHTML     contentFormat = "html"
+	ContentFormatHTML     ContentFormat = "html"
 	ContentFormatMarkdown               = "markdown"
 )
 
 // Publish statuses that are available when creating a post on Medium.
 const (
-	PublishStatusDraft    publishStatus = "draft"
+	PublishStatusDraft    PublishStatus = "draft"
 	PublishStatusUnlisted               = "unlisted"
 	PublishStatusPublic                 = "public"
 )
 
 // Licenses that are available when creating a post on Medium.
 const (
-	LicenseAllRightsReserved license = "all-rights-reserved"
+	LicenseAllRightsReserved License = "all-rights-reserved"
 	LicenseCC40By                    = "cc-40-by"
 	LicenseCC40BySA                  = "cc-40-by-sa"
 	LicenseCC40ByND                  = "cc-40-by-nd"
@@ -78,11 +78,11 @@ type CreatePostOptions struct {
 	UserID        string        `json:"-"`
 	Title         string        `json:"title"`
 	Content       string        `json:"content"`
-	ContentFormat contentFormat `json:"contentFormat"`
+	ContentFormat ContentFormat `json:"contentFormat"`
 	Tags          []string      `json:"tags,omitempty"`
 	CanonicalURL  string        `json:"canonicalUrl,omitempty"`
-	PublishStatus publishStatus `json:"publishStatus,omitempty"`
-	License       license       `json:"license,omitempty"`
+	PublishStatus PublishStatus `json:"publishStatus,omitempty"`
+	License       License       `json:"license,omitempty"`
 }
 
 // UploadOptions defines the options for uploading files to Medium.
@@ -144,8 +144,8 @@ type Post struct {
 	Tags         []string      `json:"tags"`
 	URL          string        `json:"url"`
 	CanonicalURL string        `json:"canonicalUrl"`
-	PublishState publishStatus `json:"publishStatus"`
-	License      license       `json:"license"`
+	PublishState PublishStatus `json:"publishStatus"`
+	License      License       `json:"license"`
 	LicenseURL   string        `json:"licenseUrl"`
 }
 
@@ -200,7 +200,7 @@ func NewClientWithAccessToken(accessToken string) *Medium {
 
 // GetAuthorizationURL returns the URL to which an application may send
 // a user in order to acquire authorization.
-func (m *Medium) GetAuthorizationURL(state, redirectURL string, scopes ...scope) string {
+func (m *Medium) GetAuthorizationURL(state, redirectURL string, scopes ...Scope) string {
 	s := make([]string, len(scopes))
 	for i, scp := range scopes {
 		s[i] = string(scp)
@@ -454,10 +454,10 @@ func (m *Medium) acquireAccessToken(v url.Values) (AccessToken, error) {
 	return at, err
 }
 
-type contentFormat string
-type publishStatus string
-type license string
-type scope string
+type ContentFormat string
+type PublishStatus string
+type License string
+type Scope string
 
 // clientRequest defines information that can be used to make a request to Medium.
 type clientRequest struct {
