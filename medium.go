@@ -24,6 +24,7 @@ const (
 	ScopeBasicProfile Scope = "basicProfile"
 	ScopePublishPost        = "publishPost"
 	ScopeUploadImage        = "uploadImage"
+	ScopeListPublications   = "listPublications"
 )
 
 // Content formats that are available when creating a post on Medium.
