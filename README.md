@@ -46,7 +46,9 @@ func main() {
 	m2 := medium.NewClientWithAccessToken("SELF_ISSUED_ACCESS_TOKEN")
 
 	// Get profile details of the user identified by the access token.
-	u, err := m2.GetUser()
+	// Empty string mean current user, otherwise you need to indicate
+	// the user id (alphanumeric string with 65 chars)
+	u, err := m2.GetUser("")
 	if err != nil {
 		log.Fatal(err)
 	}
